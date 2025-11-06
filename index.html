@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Edu: Dashboard Pembelajaran Kecerdasan Buatan (Fase E)</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Variabel Warna Kunci */
+        :root {
+            --soft-blue: #e0f2ff; /* Sangat Biru Muda */
+            --indigo-text: #4B0082; /* Indigo gelap untuk teks kontras tinggi */
+            --lilac-accent: #DDA0DD; /* Ungu Muda/Lilac */
+            --soft-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            --gradient-bg: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%); /* Gradien Halus */
+        }
+
+        /* Gaya Latar Belakang */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gradient-bg);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--indigo-text);
+        }
+
+        /* Kartu dengan Sudut Membulat dan Bayangan Lembut (Flat 2.0) */
+        .card {
+            background-color: white;
+            border-radius: 1.25rem; /* Sudut Sangat Membulat */
+            box-shadow: var(--soft-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(179, 224, 255, 0.5); /* Garis tepi soft blue */
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Elemen Abstrak Mengambang (Animated Background) */
+        .neuron-blob {
+            position: absolute;
+            background: var(--lilac-accent);
+            opacity: 0.1;
+            filter: blur(60px);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: float-and-pulse 25s infinite alternate ease-in-out;
+        }
+
+        .neuron-blob-1 { top: 10%; left: 5%; width: 150px; height: 150px; animation-delay: 0s; }
+        .neuron-blob-2 { bottom: 20%; right: 10%; width: 200px; height: 200px; background: #B3E0FF; opacity: 0.15; animation-delay: 5s; }
+        .neuron-blob-3 { top: 50%; left: 45%; width: 100px; height: 100px; animation-delay: 10s; }
+
+        @keyframes float-and-pulse {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, -20px) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* Gaya Ikon Gradient (Simulasi) */
+        .gradient-icon {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(45deg, #B3E0FF, var(--lilac-accent), var(--indigo-text));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Progres Bar Kustom */
+        .progress-bar {
+            height: 10px;
+            border-radius: 9999px;
+            background-color: #B3E0FF; /* Soft Blue track */
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #B3E0FF, #DDA0DD); /* Soft Blue ke Lilac */
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Elemen Abstrak Mengambang Latar Belakang -->
+    <div class="neuron-blob neuron-blob-1"></div>
+    <div class="neuron-blob neuron-blob-2"></div>
+    <div class="neuron-blob neuron-blob-3"></div>
+
+    <div class="relative min-h-screen p-4 sm:p-8 z-10">
+        <!-- Header -->
+        <header class="mb-8 p-4 bg-white/70 backdrop-blur-sm card shadow-lg flex justify-between items-center sticky top-0 z-20">
+            <h1 class="text-3xl font-bold gradient-icon">
+                🤖 AI Edu <span class="text-base font-normal text-indigo-900 ml-2">| Fase E</span>
+            </h1>
+            <button onclick="renderContent('dashboard')" class="bg-indigo-900 text-white px-4 py-2 rounded-full font-semibold hover:bg-indigo-700 transition">
+                🏠 Dashboard Utama
+            </button>
+        </header>
+
+        <!-- Konten Utama (Berubah) -->
+        <main id="app-content" class="pt-2">
+            <!-- Konten akan dimuat di sini oleh JavaScript -->
+        </main>
+    </div>
+
+    <!-- Modal Input Nama & Kelas (Baru) -->
+    <div id="user-data-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 hidden flex justify-center items-center p-4">
+        <div class="card p-8 w-full max-w-sm text-center">
+            <h2 class="text-2xl font-extrabold mb-4 text-indigo-900">Mulai Kuis!</h2>
+            <p class="text-gray-700 mb-6">Masukkan Nama dan Kelas Anda untuk mencatat skor.</p>
+            <form id="user-data-form">
+                <input type="text" id="input-nama" placeholder="Nama Lengkap" required class="w-full p-3 mb-4 border border-indigo-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-gray-700">
+                <input type="text" id="input-kelas" placeholder="Kelas (Contoh: IX-A)" required class="w-full p-3 mb-6 border border-indigo-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-gray-700">
+                <button type="submit" class="bg-indigo-900 text-white px-6 py-3 rounded-full font-semibold hover:bg-indigo-700 transition w-full">
+                    Mulai Kuis Sekarang
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Kuis Selesai -->
+    <div id="quiz-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 hidden flex justify-center items-center p-4">
+        <div class="card p-8 w-full max-w-md text-center">
+            <h2 id="modal-title" class="text-3xl font-extrabold mb-4 text-indigo-900">Kuis Selesai!</h2>
+            <p class="text-xl mb-6 text-gray-700">Skor Anda:</p>
+            <p id="final-score" class="text-6xl font-black gradient-icon mb-4"></p>
+            <p id="submission-status" class="text-sm font-medium text-gray-500 mb-6">Mengirim data...</p>
+            <div id="quiz-message" class="mb-8 text-lg font-medium"></div>
+            <button onclick="renderContent('dashboard'); document.getElementById('quiz-modal').classList.add('hidden');" class="bg-indigo-900 text-white px-6 py-3 rounded-full font-semibold hover:bg-indigo-700 transition w-full">
+                Kembali ke Dashboard
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- KONFIGURASI PENTING ---
+        // URL Apps Script Anda telah dimasukkan di sini:
+        const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdhh7nAq27FUMwkAT6-3JFMwk41Z8Z5quFk0ui3oLgQIddL1CV_s7L0SNqhvRIPKMD/exec'; 
+
+        // --- DATA APLIKASI ---
+
+        let userProgress = {
+            completedModules: [],
+            lastScore: 0,
+            currentView: 'dashboard',
+            reflections: {},
+            nama: '',  // NEW: Menyimpan nama siswa
+            kelas: ''  // NEW: Menyimpan kelas siswa
+        };
+
+        const modules = [
+            {
+                id: 1, title: "Apa Itu Kecerdasan Buatan (AI)?", icon: "🤖",
+                reflectionQ: "Setelah memahami definisi dasar AI, bagaimana menurutmu AI bisa membantu pekerjaan rumah (PR) sekolahmu? Berikan satu contoh spesifik!",
+                content: `
+                    <p class="text-gray-700 mb-4">AI, atau Kecerdasan Buatan (Artificial Intelligence), adalah ilmu komputer yang bertujuan membuat mesin atau program dapat berpikir dan bertindak seperti manusia.</p>
+                    <p class="text-gray-700 mb-4">Tujuannya adalah meniru fungsi kognitif manusia seperti belajar, memecahkan masalah, dan membuat keputusan.</p>
+                    <div class="p-4 bg-blue-50 border-l-4 border-indigo-500 rounded-lg my-4">
+                        <p class="font-bold text-indigo-900">AI BUKAN:</p>
+                        <ul class="list-disc list-inside ml-2 text-sm text-gray-600">
+                            <li>Sihir atau makhluk hidup.</li>
+                            <li>Hanya sekadar robot fisik.</li>
+                            <li>Kalkulator biasa.</li>
+                        </ul>
+                    </div>
+                    <p class="text-gray-700">AI adalah perangkat lunak yang sangat pintar. Contoh sederhananya, ketika komputer bermain catur, itu adalah AI!</p>
+                `
+            },
+            {
+                id: 2, title: "Sejarah Singkat AI", icon: "📜",
+                reflectionQ: "Bagian sejarah AI mana yang menurutmu paling menarik? Kenapa? (Misalnya: Tes Turing atau Era Big Data)",
+                content: `
+                    <h3 class="text-2xl font-semibold mb-3 text-indigo-800">Garis Waktu Penting</h3>
+                    <ul class="space-y-4">
+                        <li class="p-3 bg-purple-50 rounded-lg">
+                            <span class="font-bold text-indigo-900">Sebelum 1950-an:</span> Ide awal tentang mesin berpikir (mitos, robot fiksi).
+                        </li>
+                        <li class="p-3 bg-purple-50 rounded-lg">
+                            <span class="font-bold text-indigo-900">1950:</span> Alan Turing (Bapak Komputer Modern) menciptakan "Tes Turing" untuk menguji kecerdasan mesin.
+                        </li>
+                        <li class="p-3 bg-purple-50 rounded-lg">
+                            <span class="font-bold text-indigo-900">1956:</span> Kelahiran Istilah AI. John McCarthy secara resmi mencetuskan istilah "Artificial Intelligence" pada konferensi Dartmouth.
+                        </li>
+                        <li class="p-3 bg-purple-50 rounded-lg">
+                            <span class="font-bold text-indigo-900">Era Modern (2000-an - Sekarang):</span> Didorong oleh ketersediaan <strong class="text-indigo-600">Big Data</strong> (data besar) dan kekuatan komputasi yang murah. Ini memicu perkembangan pesat <strong class="text-indigo-600">Machine Learning</strong> dan Deep Learning.
+                        </li>
+                    </ul>
+                `
+            },
+            {
+                id: 3, title: "Contoh AI Sehari-hari", icon: "📱",
+                reflectionQ: "Dari contoh AI sehari-hari, mana yang paling sering kamu gunakan dan bagaimana AI itu membuat hidupmu lebih mudah?",
+                content: `
+                    <p class="text-gray-700 mb-4">AI sudah menjadi bagian tak terpisahkan dari kehidupan kita. Berikut adalah contoh yang sering kita temui:</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <span class="text-2xl mr-3 flex-shrink-0">🗣️</span>
+                            <div>
+                                <strong class="text-indigo-900">Asisten Virtual:</strong> Seperti Siri, Google Assistant, atau Alexa. Mereka mengerti perintah suara kita dan memberikan jawaban cerdas.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-2xl mr-3 flex-shrink-0">🎬</span>
+                            <div>
+                                <strong class="text-indigo-900">Sistem Rekomendasi:</strong> Ketika YouTube atau Netflix menyarankan video/film baru yang mungkin kamu suka, itu adalah AI yang menganalisis kebiasaanmu.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-2xl mr-3 flex-shrink-0">📧</span>
+                            <div>
+                                <strong class="text-indigo-900">Filter Spam Email:</strong> AI bertugas memisahkan email penting dari email sampah (spam) agar kotak masukmu tetap bersih.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-2xl mr-3 flex-shrink-0">🤳</span>
+                            <div>
+                                <strong class="text-indigo-900">Pengenalan Wajah (Face Unlock):</strong> AI menganalisis fitur wajahmu untuk membuka kunci ponsel.
+                            </div>
+                        </li>
+                    </ul>
+                `
+            },
+            {
+                id: 4, title: "Penerapan dan Manfaat AI", icon: "🌐",
+                reflectionQ: "Menurutmu, di antara Kesehatan, Transportasi, dan Pendidikan, bidang mana yang paling diuntungkan oleh AI? Jelaskan alasannya.",
+                content: `
+                    <p class="text-gray-700 mb-4">AI digunakan di berbagai bidang untuk meningkatkan efisiensi dan kemampuan.</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-blue-100/70 rounded-xl">
+                            <span class="text-3xl block mb-2">💊</span>
+                            <strong class="text-indigo-900">Kesehatan:</strong> Membantu dokter memprediksi penyakit lebih awal dari hasil scan (foto rontgen) atau mendiagnosis penyakit langka.
+                        </div>
+                        <div class="p-4 bg-blue-100/70 rounded-xl">
+                            <span class="text-3xl block mb-2">🚗</span>
+                            <strong class="text-indigo-900">Transportasi:</strong> Pengembangan mobil tanpa pengemudi (mobil otonom) dan sistem navigasi yang cerdas (seperti Google Maps).
+                        </div>
+                        <div class="p-4 bg-blue-100/70 rounded-xl">
+                            <span class="text-3xl block mb-2">📚</span>
+                            <strong class="text-indigo-900">Pendidikan:</strong> Sistem e-learning yang dapat menyesuaikan materi belajar berdasarkan kecepatan dan pemahaman siswa.
+                        </div>
+                        <div class="p-4 bg-blue-100/70 rounded-xl">
+                            <span class="text-3xl block mb-2">⚙️</span>
+                            <strong class="text-indigo-900">Industri/Bisnis:</strong> Chatbot untuk layanan pelanggan dan robot industri yang bekerja dengan presisi tinggi.
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 5, title: "Cabang-cabang AI", icon: "🌳",
+                reflectionQ: "Jika kamu harus memilih satu cabang AI (ML, NLP, atau Computer Vision) untuk dikembangkan, mana yang kamu pilih dan akan kamu gunakan untuk proyek apa?",
+                content: `
+                    <p class="text-gray-700 mb-4">AI memiliki beberapa bidang fokus utama. Tiga cabang terbesar yang wajib kamu tahu:</p>
+                    <ul class="space-y-4">
+                        <li class="p-4 card shadow-none bg-purple-50 border-purple-200">
+                            <strong class="text-indigo-900 text-lg flex items-center mb-1">🧠 Machine Learning (Pembelajaran Mesin)</strong>
+                            <p class="text-sm text-gray-600">Cara AI belajar dari data. Alih-alih diprogram untuk melakukan setiap tugas, AI diberi data dan ia menemukan pola sendiri (seperti seorang siswa yang belajar dari banyak contoh soal).</p>
+                        </li>
+                        <li class="p-4 card shadow-none bg-purple-50 border-purple-200">
+                            <strong class="text-indigo-900 text-lg flex items-center mb-1">💬 Natural Language Processing (NLP)</strong>
+                            <p class="text-sm text-gray-600">Bidang yang membuat komputer dapat memahami, menafsirkan, dan menghasilkan bahasa manusia (teks dan suara). Ini yang membuat chatbot bekerja!</p>
+                        </li>
+                        <li class="p-4 card shadow-none bg-purple-50 border-purple-200">
+                            <strong class="text-indigo-900 text-lg flex items-center mb-1">👁️ Computer Vision (Penglihatan Komputer)</strong>
+                            <p class="text-sm text-gray-600">Membuat komputer dapat "melihat" dan memahami konten visual dari gambar atau video. Digunakan di mobil otonom dan pengenal wajah.</p>
+                        </li>
+                    </ul>
+                `
+            },
+            {
+                id: 6, title: "Cara Kerja AI (Sederhana)", icon: "⚙️",
+                reflectionQ: "Dalam tiga tahap dasar kerja AI (Input, Proses, Output), apa peran paling penting dari 'Algoritma'?",
+                content: `
+                    <h3 class="text-2xl font-semibold mb-3 text-indigo-800">Tiga Tahap Dasar</h3>
+                    <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4 text-center">
+                        <div class="flex-1 p-6 bg-blue-200/50 rounded-xl card shadow-none">
+                            <span class="text-4xl block mb-2">1. 📥</span>
+                            <strong class="text-indigo-900">INPUT DATA</strong>
+                            <p class="text-sm text-gray-700 mt-1">AI membutuhkan banyak data (teks, gambar, angka) untuk "belajar".</p>
+                        </div>
+                        <span class="text-5xl text-indigo-500 hidden sm:block">➡️</span>
+                        <div class="flex-1 p-6 bg-blue-200/50 rounded-xl card shadow-none">
+                            <span class="text-4xl block mb-2">2. 🧠</span>
+                            <strong class="text-indigo-900">PROSES (ALGORITMA)</strong>
+                            <p class="text-sm text-gray-700 mt-1">Data diproses oleh Algoritma (aturan/instruksi) untuk menemukan pola.</p>
+                        </div>
+                        <span class="text-5xl text-indigo-500 hidden sm:block">➡️</span>
+                        <div class="flex-1 p-6 bg-blue-200/50 rounded-xl card shadow-none">
+                            <span class="text-4xl block mb-2">3. 💡</span>
+                            <strong class="text-indigo-900">OUTPUT (KEPUTUSAN)</strong>
+                            <p class="text-sm text-gray-700 mt-1">Berdasarkan pola, AI membuat prediksi atau keputusan (misalnya: ini kucing, bukan anjing).</p>
+                        </div>
+                    </div>
+                    <p class="mt-6 text-gray-700">Intinya, AI bekerja seperti kita belajar dari pengalaman: semakin banyak contoh (data) yang ia lihat, semakin baik ia mengambil keputusan di masa depan.</p>
+                `
+            },
+        ];
+
+        // 15 Soal Kuis
+        const quizQuestions = [
+            { q: "Apa kepanjangan dari AI?", options: ["Artificial Idea", "Automatic Intelligence", "Artificial Intelligence", "Advanced Interface"], answer: 2 },
+            { q: "Tujuan utama AI adalah membuat mesin...", options: ["Lebih cepat dari mobil", "Berpikir dan bertindak seperti manusia", "Dapat mencuci baju", "Berbahan bakar listrik"], answer: 1 },
+            { q: "Siapakah yang mencetuskan istilah 'Artificial Intelligence' pada tahun 1956?", options: ["Alan Turing", "John McCarthy", "Bill Gates", "Elon Musk"], answer: 1 },
+            { q: "Contoh AI yang sering kamu gunakan untuk mendapatkan rekomendasi film atau lagu adalah...", options: ["Kalkulator di HP", "Aplikasi Streaming (Netflix/Spotify)", "Lampu belajar", "Mesin Tik"], answer: 1 },
+            { q: "Kemampuan AI untuk 'melihat' dan mengenali objek dalam gambar/video disebut...", options: ["Natural Language Processing", "Machine Learning", "Computer Vision", "Robotika"], answer: 2 },
+            { q: "Apa yang harus diberikan kepada AI agar ia bisa 'belajar'?", options: ["Makanan", "Data", "Minyak", "Uang"], answer: 1 },
+            { q: "Salah satu penerapan AI di bidang Kesehatan adalah...", options: ["Membuat robot untuk memasak", "Membantu dokter mendiagnosis penyakit", "Membuat jalan tol otomatis", "Menggantikan guru di kelas"], answer: 1 },
+            { q: "Cabang AI yang berfokus pada cara mesin belajar dari data tanpa diprogram secara spesifik adalah...", options: ["Artificial General Intelligence", "Machine Learning", "Deep Drawing", "Visual Art"], answer: 1 },
+            { q: "Yang bukan merupakan contoh AI dalam kehidupan sehari-hari adalah...", options: ["Asisten Virtual (Siri/Alexa)", "Filter Spam Email", "Rice Cooker Biasa", "Fitur Face Unlock di HP"], answer: 2 },
+            { q: "NLP (Natural Language Processing) adalah cabang AI yang memungkinkan mesin untuk...", options: ["Membuat gambar 3D", "Mengendarai mobil", "Memahami dan memproses bahasa manusia", "Memperbaiki mesin rusak"], answer: 2 },
+            { q: "Rangkaian instruksi atau aturan yang digunakan komputer untuk memecahkan masalah disebut...", options: ["Protokol", "Algoritma", "Database", "Hardware"], answer: 1 },
+            { q: "Di bidang pendidikan, AI dapat membantu dengan...", options: ["Menulis semua buku pelajaran", "Menyediakan sistem belajar adaptif sesuai kemampuan siswa", "Mengatur jam istirahat", "Menghapus semua PR"], answer: 1 },
+            { q: "Apa dampak positif AI bagi pekerjaan manusia?", options: ["Menggantikan semua pekerjaan manusia", "Meningkatkan efisiensi dan menciptakan pekerjaan baru", "Membuat manusia tidak perlu berpikir", "Hanya cocok untuk hiburan"], answer: 1 },
+            { q: "Apa yang dimaksud dengan 'chatbot'?", options: ["Robot yang bisa berjalan", "Program komputer yang dapat berkomunikasi seperti manusia", "Alat pembersih otomatis", "Mesin pembuat kopi"], answer: 1 },
+            { q: "Era AI modern ditandai dengan ketersediaan dan penggunaan...", options: ["Komputer sangat kecil", "Printer yang cepat", "Big Data (Data Besar)", "Internet lambat"], answer: 2 },
+        ];
+        
+        // Jawaban pengguna untuk kuis
+        let userAnswers = new Array(quizQuestions.length).fill(null);
+        let currentQuestionIndex = 0;
+
+        // --- FUNGSI AUTO-SAVE REFLEKSI (BARU) ---
+        function autoSaveReflection(moduleId) {
+            const moduleIdStr = String(moduleId); 
+            const textarea = document.getElementById(`reflection-input-${moduleId}`);
+            // Langsung simpan nilai textarea ke objek reflections saat ada perubahan
+            userProgress.reflections[moduleIdStr] = textarea.value.trim();
+        }
+        
+        // --- FUNGSI SIMPAN MANUAL REFLEKSI ---
+        function saveReflection(moduleId) {
+            const textarea = document.getElementById(`reflection-input-${moduleId}`);
+            const answer = textarea.value.trim();
+
+            const messageBox = document.getElementById('reflection-save-message');
+            messageBox.innerHTML = ''; // Reset pesan
+
+            if (answer) {
+                // Panggil auto-save untuk memastikan data terbaru tersimpan
+                autoSaveReflection(moduleId); 
+                messageBox.innerHTML = `<span class="text-sm text-green-700 font-semibold flex items-center mt-2">✅ Jawaban refleksi berhasil disimpan! (Auto-Saved)</span>`;
+            } else {
+                messageBox.innerHTML = `<span class="text-sm text-red-700 font-semibold flex items-center mt-2">⚠️ Refleksi tidak boleh kosong.</span>`;
+            }
+
+            setTimeout(() => messageBox.innerHTML = '', 3000); 
+        }
+
+
+        // --- FUNGSI SUBMIT DATA KE SHEET ---
+
+        async function submitDataToSheet(data) {
+            const statusDiv = document.getElementById('submission-status');
+            statusDiv.innerText = 'Mengirim data ke Spreadsheet... ⏳';
+
+            if (APPSCRIPT_URL === 'PASTE_URL_APPSCRIPT_ANDA_DI_SINI') {
+                statusDiv.innerText = 'Gagal: Mohon ganti APPSCRIPT_URL di kode!';
+                statusDiv.classList.add('text-red-600');
+                return;
+            }
+
+            try {
+                const response = await fetch(APPSCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Penting untuk Apps Script doPost
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                // Karena menggunakan mode 'no-cors', kita anggap berhasil jika fetch tidak melempar error.
+                statusDiv.innerText = '✅ Data Berhasil Terkirim!';
+                statusDiv.classList.remove('text-red-600');
+                statusDiv.classList.add('text-green-600');
+
+            } catch (error) {
+                console.error("Error submitting data:", error);
+                statusDiv.innerText = `❌ Gagal mengirim data. Cek koneksi atau URL Apps Script.`;
+                statusDiv.classList.add('text-red-600');
+            }
+        }
+
+
+        // --- FUNGSI UTAMA ---
+
+        function calculateProgress() {
+            return (userProgress.completedModules.length / modules.length) * 100;
+        }
+
+        function toggleModuleCompletion(moduleId) {
+            const index = userProgress.completedModules.indexOf(moduleId);
+            if (index > -1) {
+                userProgress.completedModules.splice(index, 1);
+            } else {
+                userProgress.completedModules.push(moduleId);
+            }
+            renderContent('dashboard');
+        }
+
+        function renderDashboard() {
+            // Menghilangkan modal input data jika masih ada
+            document.getElementById('user-data-modal').classList.add('hidden');
+
+            const contentDiv = document.getElementById('app-content');
+            const progress = calculateProgress();
+
+            // Status Progres
+            const progressCard = `
+                <div class="card p-6 bg-white/90 mb-8 border-l-8 border-indigo-500">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold text-indigo-900 flex items-center">
+                            Progress Pembelajaran Anda 🚀
+                        </h2>
+                        <span class="text-3xl font-extrabold gradient-icon">${Math.round(progress)}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%;"></div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">${userProgress.completedModules.length} dari ${modules.length} Modul Selesai</p>
+                </div>
+            `;
+
+            // Status Kuis
+            const quizCard = `
+                <div class="card p-6 bg-white/90 mb-8">
+                    <h2 class="text-xl font-bold text-indigo-900 flex items-center mb-3">
+                        Skor Kuis Terakhir 🏆
+                    </h2>
+                    <p class="text-5xl font-black gradient-icon mb-4">${userProgress.lastScore}/${quizQuestions.length}</p>
+                    <p class="text-sm text-gray-600 mb-4">${userProgress.nama ? `Peserta: ${userProgress.nama} (${userProgress.kelas})` : 'Masukkan detail peserta sebelum kuis.'}</p>
+                    <button onclick="openUserDataModal()" class="bg-lilac-accent text-white px-4 py-2 rounded-full font-semibold hover:opacity-80 transition w-full">
+                        ${userProgress.lastScore > 0 ? 'Ulangi Kuis' : 'Mulai Kuis'} (15 Soal)
+                    </button>
+                </div>
+            `;
+
+            // Kartu Modul
+            const moduleCards = modules.map(mod => {
+                const isCompleted = userProgress.completedModules.includes(mod.id);
+                const reflectionSaved = userProgress.reflections[String(mod.id)] && userProgress.reflections[String(mod.id)].length > 0;
+                
+                let statusBadge;
+                if (isCompleted) {
+                    statusBadge = `<span class="text-xs font-semibold px-3 py-1 bg-green-100 text-green-600 rounded-full flex items-center">✅ Selesai</span>`;
+                } else if (reflectionSaved) {
+                    statusBadge = `<span class="text-xs font-semibold px-3 py-1 bg-yellow-100 text-yellow-600 rounded-full flex items-center">📝 Refleksi Tersimpan</span>`;
+                } else {
+                    statusBadge = `<span class="text-xs font-semibold px-3 py-1 bg-blue-100 text-blue-600 rounded-full flex items-center">➡️ Lanjutkan</span>`;
+                }
+                
+                return `
+                    <div onclick="renderContent('module', ${mod.id})" class="card p-6 bg-white/90 flex flex-col justify-between h-full hover:shadow-xl">
+                        <div class="flex items-start justify-between mb-4">
+                            <span class="text-5xl">${mod.icon}</span>
+                            ${statusBadge}
+                        </div>
+                        <h3 class="text-xl font-bold text-indigo-900 mb-2">${mod.title}</h3>
+                        <p class="text-sm text-gray-600">Pelajari konsep dasar, sejarah, hingga penerapan AI.</p>
+                    </div>
+                `;
+            }).join('');
+
+            contentDiv.innerHTML = `
+                <div class="grid lg:grid-cols-3 gap-8 mb-8">
+                    <div class="lg:col-span-2">${progressCard}</div>
+                    <div>${quizCard}</div>
+                </div>
+                
+                <h2 class="text-2xl font-bold text-indigo-900 mb-6">Modul Pembelajaran</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${moduleCards}
+                </div>
+            `;
+        }
+
+        // FUNGSI BARU: Membuka modal data pengguna
+        function openUserDataModal() {
+            document.getElementById('user-data-modal').classList.remove('hidden');
+            // Isi kembali jika sudah pernah diisi
+            document.getElementById('input-nama').value = userProgress.nama;
+            document.getElementById('input-kelas').value = userProgress.kelas;
+        }
+
+        // FUNGSI BARU: Menangani submit form data pengguna
+        document.getElementById('user-data-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            userProgress.nama = document.getElementById('input-nama').value.trim();
+            userProgress.kelas = document.getElementById('input-kelas').value.trim();
+
+            if (userProgress.nama && userProgress.kelas) {
+                document.getElementById('user-data-modal').classList.add('hidden');
+                // Lanjutkan ke kuis
+                renderContent('quiz');
+            }
+        });
+
+
+        function renderModuleDetail(moduleId) {
+            const mod = modules.find(m => m.id === moduleId);
+            if (!mod) return renderDashboard();
+
+            const isCompleted = userProgress.completedModules.includes(mod.id);
+            const contentDiv = document.getElementById('app-content');
+            
+            // Ambil jawaban refleksi yang tersimpan
+            const savedReflection = userProgress.reflections[String(mod.id)] || '';
+
+            const reflectionSection = `
+                <div class="mt-8 pt-6 border-t border-indigo-200">
+                    <h3 class="text-2xl font-bold text-indigo-900 mb-4">Refleksi Diri 📝</h3>
+                    <div class="p-4 bg-purple-50 rounded-xl mb-4 border border-purple-200">
+                        <p class="font-semibold text-indigo-800">${mod.reflectionQ}</p>
+                    </div>
+                    <textarea id="reflection-input-${mod.id}" rows="4" 
+                              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-gray-700"
+                              placeholder="Tuliskan jawaban refleksi Anda di sini..."
+                              onchange="autoSaveReflection(${mod.id})">${savedReflection}</textarea>
+                    
+                    <button onclick="saveReflection(${mod.id})" 
+                            class="mt-3 bg-lilac-accent text-white px-6 py-2 rounded-full font-semibold hover:opacity-80 transition">
+                        Simpan Jawaban Refleksi (Auto-Save Aktif)
+                    </button>
+                    <div id="reflection-save-message"></div>
+                </div>
+            `;
+
+            contentDiv.innerHTML = `
+                <div class="card p-8 bg-white/90 max-w-4xl mx-auto">
+                    <div class="flex items-center mb-6">
+                        <span class="text-4xl mr-4">${mod.icon}</span>
+                        <h2 class="text-3xl font-extrabold text-indigo-900">${mod.title}</h2>
+                    </div>
+                    
+                    <div class="prose max-w-none text-base text-gray-800 leading-relaxed mb-8">
+                        ${mod.content}
+                    </div>
+                    
+                    ${reflectionSection}
+
+                    <div class="border-t pt-4 mt-8 flex justify-between items-center">
+                        <button onclick="toggleModuleCompletion(${mod.id})" 
+                            class="px-4 py-2 rounded-full font-semibold transition ${isCompleted ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-green-100 text-green-600 hover:bg-green-200'}">
+                            ${isCompleted ? '❌ Tandai Belum Selesai' : '✅ Tandai Selesai'}
+                        </button>
+
+                        <div class="flex space-x-3">
+                            ${mod.id > 1 ? `<button onclick="renderContent('module', ${mod.id - 1})" class="text-indigo-900 px-4 py-2 rounded-full border border-indigo-300 hover:bg-indigo-50 transition">
+                                ⬅️ Sebelumnya
+                            </button>` : ''}
+                            ${mod.id < modules.length ? `<button onclick="renderContent('module', ${mod.id + 1})" class="bg-indigo-900 text-white px-4 py-2 rounded-full font-semibold hover:bg-indigo-700 transition">
+                                Selanjutnya ➡️
+                            </button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderQuiz() {
+            // Cek apakah nama dan kelas sudah diisi
+            if (!userProgress.nama || !userProgress.kelas) {
+                // Jika belum, paksa buka modal input data
+                openUserDataModal();
+                return;
+            }
+
+            const contentDiv = document.getElementById('app-content');
+            userProgress.currentView = 'quiz';
+
+            if (currentQuestionIndex >= quizQuestions.length) {
+                displayQuizResult();
+                return;
+            }
+
+            const qData = quizQuestions[currentQuestionIndex];
+            const qIndex = currentQuestionIndex + 1;
+            
+            const optionsHtml = qData.options.map((opt, index) => {
+                const isSelected = userAnswers[currentQuestionIndex] === index;
+                return `
+                    <label class="flex items-center p-4 card cursor-pointer mb-3 transition ${isSelected ? 'bg-blue-200 ring-2 ring-indigo-500' : 'bg-white hover:bg-blue-50'}">
+                        <input type="radio" name="answer" value="${index}" 
+                                ${isSelected ? 'checked' : ''}
+                                onchange="selectAnswer(${index})" class="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 mr-4">
+                        <span class="text-gray-800 font-medium">${opt}</span>
+                    </label>
+                `;
+            }).join('');
+
+            contentDiv.innerHTML = `
+                <div class="card p-8 bg-white/90 max-w-2xl mx-auto">
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold text-indigo-900">Peserta: ${userProgress.nama} (${userProgress.kelas})</h2>
+                        <h2 class="text-xl font-bold text-indigo-900">Pertanyaan ${qIndex} dari ${quizQuestions.length}</h2>
+                        <div class="progress-bar mt-2">
+                            <div class="progress-fill" style="width: ${(qIndex / quizQuestions.length) * 100}%;"></div>
+                        </div>
+                    </div>
+
+                    <p class="text-2xl font-semibold mb-6 text-gray-800">${qData.q}</p>
+
+                    <form id="quiz-form">
+                        ${optionsHtml}
+                    </form>
+
+                    <div class="mt-8 flex justify-between">
+                        <button onclick="prevQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''}
+                            class="px-6 py-3 rounded-full font-semibold transition ${currentQuestionIndex === 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-100 text-indigo-900 hover:bg-blue-200'}">
+                            ⬅️ Kembali
+                        </button>
+                        <button onclick="nextQuestion()" ${userAnswers[currentQuestionIndex] === null ? 'disabled' : ''}
+                            class="px-6 py-3 rounded-full font-semibold transition ${userAnswers[currentQuestionIndex] === null ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-indigo-900 text-white hover:bg-indigo-700'}">
+                            ${qIndex === quizQuestions.length ? 'Selesai & Lihat Skor' : 'Selanjutnya ➡️'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectAnswer(index) {
+            userAnswers[currentQuestionIndex] = index;
+            renderQuiz(); 
+        }
+
+        function nextQuestion() {
+            if (userAnswers[currentQuestionIndex] === null) return;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizQuestions.length) {
+                renderQuiz();
+            } else {
+                displayQuizResult();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuiz();
+            }
+        }
+
+        function calculateScore() {
+            let score = 0;
+            for (let i = 0; i < quizQuestions.length; i++) {
+                if (userAnswers[i] === quizQuestions[i].answer) {
+                    score++;
+                }
+            }
+            return score;
+        }
+
+        async function displayQuizResult() {
+            const finalScore = calculateScore();
+            userProgress.lastScore = finalScore;
+            
+            let message = '';
+            let modalTitle = 'Hebat!';
+            if (finalScore >= 13) {
+                message = 'Nilai Anda luar biasa! Pemahaman Anda tentang AI sudah sangat baik. Teruslah belajar! 💪';
+            } else if (finalScore >= 8) {
+                message = 'Nilai yang bagus! Anda sudah menguasai sebagian besar materi. Coba review lagi beberapa modul untuk skor sempurna.';
+                modalTitle = 'Cukup Baik!';
+            } else {
+                message = 'Jangan berkecil hati! Anda perlu meninjau kembali materi-materi AI. Coba ulangi kuis setelah mempelajari modul lagi.';
+                modalTitle = 'Perlu Peningkatan!';
+            }
+
+            // 1. Persiapkan Data untuk dikirim
+            const submissionData = {
+                nama: userProgress.nama,
+                kelas: userProgress.kelas,
+                score: finalScore,
+                maxScore: quizQuestions.length,
+                // Reflections yang sudah auto-saved di memori akan dikirim
+                reflections: userProgress.reflections
+            };
+
+            // 2. Tampilkan Modal
+            document.getElementById('modal-title').innerText = modalTitle;
+            document.getElementById('final-score').innerText = `${finalScore}/${quizQuestions.length}`;
+            document.getElementById('quiz-message').innerText = message;
+            document.getElementById('quiz-modal').classList.remove('hidden');
+            document.getElementById('submission-status').innerText = 'Mengirim data... ⏳';
+            document.getElementById('submission-status').classList.remove('text-green-600', 'text-red-600');
+            
+            // 3. Kirim Data secara Asinkron
+            await submitDataToSheet(submissionData);
+
+            // 4. Reset kuis state untuk pengulangan
+            currentQuestionIndex = 0;
+            userAnswers.fill(null);
+            
+            // 5. Render dashboard untuk update skor
+            renderContent('dashboard');
+        }
+
+
+        // Router sederhana
+        function renderContent(view, id = null) {
+            userProgress.currentView = view;
+            if (view === 'dashboard') {
+                renderDashboard();
+            } else if (view === 'module' && id !== null) {
+                renderModuleDetail(id);
+            } else if (view === 'quiz') {
+                // Saat memulai kuis, cek data pengguna
+                if (!userProgress.nama || !userProgress.kelas) {
+                    openUserDataModal();
+                } else {
+                    currentQuestionIndex = 0;
+                    userAnswers.fill(null);
+                    renderQuiz();
+                }
+            }
+        }
+
+        // Inisialisasi Aplikasi saat window dimuat
+        window.onload = () => {
+            renderContent('dashboard');
+        };
+    </script>
+</body>
+</html>
